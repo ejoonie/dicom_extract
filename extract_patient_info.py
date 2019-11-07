@@ -3,14 +3,15 @@ import os
 import pandas as pd
 import csv
 from datetime import datetime
+import matplotlib.pyplot as plt
+import cv2
+import PIL
+import numpy as np
 
 # config
-# Specify the .dcm folder path
-# folder_root_path = "/Volumes/GoogleDrive/My Drive/Asan Image Research/AIR_Research/04 Data/경희대 200건 유명원 PRE&POST/PRE"
-dicom_root_path = "./dicom_sample"
-
-# Current date and time
-now = datetime.now()
+# dicom_root_path = "/Volumes/GoogleDrive/My Drive/Asan Image Research/AIR_Research/04 Data/경희대 200건 유명원 PRE&POST/PRE"
+dicom_root_path = "./dicom_sample"  # 경로형태로 넣어줘야 함
+output_jpeg_dir = 'output_jpeg'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 
 
 def get_fieldnames():
@@ -30,6 +31,7 @@ def folder_to_csv(folder_name):
     :param folder_name:
     :return: none
     """
+    now = datetime.now()
     folder_path = os.path.join(dicom_root_path, folder_name)
     images_path = os.listdir(folder_path)
     # Patient's information will be stored in working directory #'Patient_Detail_Info.csv'
@@ -78,20 +80,82 @@ def folder_to_array(folder_name):
     return rows
 
 
+def folder_to_jpg(input_folder_name,
+                  output_folder_name,
+                  input_file_name=None,
+                  output_file_name=None):
+    """
+    폴더 안에 있는 다이콤 파일들을 읽어서 중간 다이콤 파일을 이미지로 출력
+    폴더 안 특정 파일을 뽑아내고 싶을땐 파일 이름을 지정해 주면 됨
+    e.g)
+    1. folder_to_jpg('dir01') => 폴더안 중간 파일
+    2. folder_to_jpg('dir01', '0045.dcm') => 폴더안 0045.dcm 파일을 jpeg 으로
+    :param input_folder_name: 다이콤파일들이 있는 디렉토리
+    :param output_folder_name: 이미지 저장 장소
+    :param input_file_name: None 이면 디폴트 파일을 읽고, 지정하면 지정 파일을 출력
+    :param output_file_name: None 이면 있으면 이 파일을 읽고, 없으면 디폴트
+    :return: array
+    """
+    input_folder_path = os.path.join(dicom_root_path, input_folder_name)
+    output_folder_path = os.path.join(dicom_root_path, output_folder_name)
+    dicom_files = os.listdir(input_folder_path)
+    dicom_files.sort()  # 이름순 정렬
+
+    # 폴더 없으면 새로 생성
+    if not os.path.exists(output_folder_path):
+        print("Directory does not exist. Creating %s" % output_folder_name)
+        os.mkdir(output_folder_path)
+
+    default_jpeg_file_name = "%s.jpg" % input_folder_name
+
+    # input_file_name 을 정했으면 그대로사용, 아니면 중간파일
+    input_file_name = input_file_name or dicom_files[int(len(dicom_files) / 2)]
+
+    # output_file_name 을 정했으면 그대로 사용, 아니면 디폴트
+    output_file_name = output_file_name or default_jpeg_file_name
+
+    # path 설정
+    input_file_path = os.path.join(input_folder_path, input_file_name)
+    output_file_path = os.path.join(output_folder_path, output_file_name)
+
+    # 어떤거 변환하는지 출력
+    print("%s => %s" % (input_file_path, output_file_name))
+
+    # 실제 변환
+    file_to_jpeg(input_file_path, output_file_path)
+
+
+def file_to_jpeg(input_file_path, output_file_path):
+    ds = dicom.dcmread(input_file_path, force=True)
+    pixel_array = ds.pixel_array
+    shape = pixel_array.shape
+    image_2d = pixel_array.astype(float)
+    image_2d_scaled = (np.maximum(image_2d, 0) / image_2d.max()) * 255.0
+    image_2d_scaled_uint8 = np.uint8(image_2d_scaled)
+
+    cv2.imwrite(output_file_path, image_2d_scaled_uint8)
+
+
 #
 # main
 #
 print("Root dir is %s" % dicom_root_path)
 all_rows = []
 # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
-for directory in os.listdir(dicom_root_path):
-    if os.path.isdir(os.path.join(dicom_root_path, directory)):
-        # folder_to_csv(directory) # 테스트용
-        rows = folder_to_array(directory)
+for folder_name in os.listdir(dicom_root_path):
+    if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_jpeg_dir:
+        # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
+        print("%s" % folder_name)
+
+        # 폴더별 jpeg 출력
+        folder_to_jpg(folder_name, output_jpeg_dir)
+
+        # 데이터 추출 및 합치기
+        rows = folder_to_array(folder_name)
         all_rows += rows
 
-# 2. csv 로 한꺼번에 출력 - 파일이름은 날짜_all.csv
-outfile_name = now.strftime("%y%m%d") + "_all" + '.csv'
+# 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_all.csv
+outfile_name = datetime.now().strftime("%y%m%d") + "_all" + '.csv'
 with open(outfile_name, 'w', newline='') as csvfile:
     # writer 생성
     writer = csv.writer(csvfile, delimiter=',')
