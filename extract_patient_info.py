@@ -97,7 +97,7 @@ def folder_to_jpg(input_folder_name,
     :return: array
     """
     input_folder_path = os.path.join(dicom_root_path, input_folder_name)
-    output_folder_path = os.path.join(dicom_root_path, output_folder_name)
+    output_folder_path = os.path.join('./', output_folder_name)
     dicom_files = os.listdir(input_folder_path)
     dicom_files.sort()  # 이름순 정렬
 
