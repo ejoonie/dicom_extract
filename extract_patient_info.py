@@ -97,7 +97,7 @@ def folder_to_jpg(input_folder_name,
     :return: array
     """
     input_folder_path = os.path.join(dicom_root_path, input_folder_name)
-    output_folder_path = os.path.join(dicom_root_path, output_folder_name)
+    output_folder_path = os.path.join('./', output_folder_name)
     dicom_files = os.listdir(input_folder_path)
     dicom_files.sort()  # 이름순 정렬
 
@@ -109,6 +109,7 @@ def folder_to_jpg(input_folder_name,
     default_jpeg_file_name = "%s.jpg" % input_folder_name
 
     # input_file_name 을 정했으면 그대로사용, 아니면 중간파일
+    # 파일의 시작은 0, 마지막 파일은 int(len(dicom_files) - 1
     input_file_name = input_file_name or dicom_files[int(len(dicom_files) / 2)]
 
     # output_file_name 을 정했으면 그대로 사용, 아니면 디폴트
