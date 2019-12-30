@@ -1,7 +1,10 @@
 import os
 import shutil
 
-dicom_root_path = './dicom_sample'
+dicom_root_path = '../from_1691'
+
+# 실수할 수도 있으므로 dry_run 을 설정해서 로그만 찍을 것인지
+# 실제 작동도 진행할 것인지 결정한다.
 # dry_run = True
 dry_run = False
 
@@ -29,7 +32,7 @@ for each_folder in os.listdir(dicom_root_path):
                 # sub folder 이름 출력
                 print(">> %s" % subfolder)
 
-                # move files
+                # 1. move files
                 for file in os.listdir(subfolder_path):
                     # 파일이름 출력
                     file_path = os.path.join(subfolder_path, file)
@@ -37,7 +40,7 @@ for each_folder in os.listdir(dicom_root_path):
                     print(">>> file: %s" % file)
                     move_file(file_path, target_path)
 
-                # delete dir
+                # 2. deleting dir
                 print("Deleting %s" % subfolder_path)
                 if not dry_run:
                     os.rmdir(subfolder_path)
