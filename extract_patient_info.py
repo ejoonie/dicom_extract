@@ -9,8 +9,8 @@ import PIL
 import numpy as np
 
 # config
-# dicom_root_path = "/Volumes/GoogleDrive/My Drive/Asan Image Research/AIR_Research/04 Data/경희대 200건 유명원 PRE&POST/PRE"
-dicom_root_path = "./dicom_sample"  # 경로형태로 넣어줘야 함
+dicom_root_path = "/Volumes/Untitled/Thigh01-0001 to 1008 post"
+# dicom_root_path = "./dicom_sample"  # 경로형태로 넣어줘야 함
 output_jpeg_dir = 'output_jpeg'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 
 
@@ -62,7 +62,7 @@ def folder_to_array(folder_name):
     folder_path = os.path.join(dicom_root_path, folder_name)
     images_path = os.listdir(folder_path)
 
-    rows = []
+    rows = [folder_name]
     fieldnames = get_fieldnames()
     for n, image in enumerate(images_path):
         ds = dicom.dcmread(os.path.join(folder_path, image), force=True)
@@ -106,7 +106,7 @@ def folder_to_jpg(input_folder_name,
         print("Directory does not exist. Creating %s" % output_folder_name)
         os.mkdir(output_folder_path)
 
-    default_jpeg_file_name = "%s.jpg" % input_folder_name
+    default_jpeg_file_name = "%s.png" % input_folder_name
 
     # input_file_name 을 정했으면 그대로사용, 아니면 중간파일
     # 파일의 시작은 0, 마지막 파일은 int(len(dicom_files) - 1
@@ -123,7 +123,11 @@ def folder_to_jpg(input_folder_name,
     print("%s => %s" % (input_file_path, output_file_name))
 
     # 실제 변환
-    file_to_jpeg(input_file_path, output_file_path)
+    try:
+        file_to_jpeg(input_file_path, output_file_path)
+    except:
+        print("이미지변환 에러발생: %s" % output_file_name)
+
 
 
 def file_to_jpeg(input_file_path, output_file_path):
@@ -149,7 +153,7 @@ for folder_name in os.listdir(dicom_root_path):
         print("%s" % folder_name)
 
         # 폴더별 jpeg 출력
-        folder_to_jpg(folder_name, output_jpeg_dir)
+        # folder_to_jpg(folder_name, output_jpeg_dir)
 
         # 데이터 추출 및 합치기
         rows = folder_to_array(folder_name)
@@ -167,3 +171,6 @@ with open(outfile_name, 'w', newline='') as csvfile:
     # 데이터 출력
     for row in all_rows:
         writer.writerow(row)
+
+# 3. 하나만 출력할 경우 실행
+# folder_to_jpg("Thigh01-0867_DCM_POST", output_jpeg_dir)
