@@ -62,11 +62,12 @@ def folder_to_array(folder_name):
     folder_path = os.path.join(dicom_root_path, folder_name)
     images_path = os.listdir(folder_path)
 
-    rows = [folder_name]
+    rows = []
     fieldnames = get_fieldnames()
     for n, image in enumerate(images_path):
         ds = dicom.dcmread(os.path.join(folder_path, image), force=True)
         row = []
+        row.append(folder_name)
         for field in fieldnames:
             if field not in ds or ds.data_element(field) is None:
                 row.append('')
@@ -147,7 +148,7 @@ def file_to_jpeg(input_file_path, output_file_path):
 print("Root dir is %s" % dicom_root_path)
 all_rows = []
 # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
-for folder_name in os.listdir(dicom_root_path):
+for folder_name in os.listdir(dicom_root_path): # [0:x] 0 부터 .. x 까지
     if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_jpeg_dir:
         # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
         print("%s" % folder_name)
