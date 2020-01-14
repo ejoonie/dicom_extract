@@ -9,8 +9,8 @@ import PIL
 import numpy as np
 
 # config
-dicom_root_path = "/Volumes/Untitled/Thigh01-0001 to 1008 post"
-# dicom_root_path = "./dicom_sample"  # 경로형태로 넣어줘야 함
+# dicom_root_path = "/Volumes/Untitled/4pre"
+dicom_root_path = "./dicom_sample"  # 경로형태로 넣어줘야 함
 output_jpeg_dir = 'output_jpeg'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 
 
@@ -21,7 +21,7 @@ def get_fieldnames():
     :return: tag array
     """
     dicom_tags = pd.read_csv('./dicom_tags.csv')
-    return list(dicom_tags['Description'])
+    return ['directory_name'] + list(dicom_tags['Description'])
 
 
 def folder_to_csv(folder_name):
