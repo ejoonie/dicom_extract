@@ -9,7 +9,6 @@ import PIL
 import numpy as np
 
 # config
-# dicom_root_path = "/Volumes/Untitled/4pre"
 dicom_root_path = "./dicom_sample"  # 경로형태로 넣어줘야 함
 output_jpeg_dir = 'output_jpeg'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 
@@ -68,6 +67,7 @@ def folder_to_array(folder_name):
         ds = dicom.dcmread(os.path.join(folder_path, image), force=True)
         row = []
         row.append(folder_name)
+        row.append(os.path.basename(image))
         for field in fieldnames:
             if field not in ds or ds.data_element(field) is None:
                 row.append('')
@@ -160,8 +160,8 @@ for folder_name in os.listdir(dicom_root_path): # [0:x] 0 부터 .. x 까지
         rows = folder_to_array(folder_name)
         all_rows += rows
 
-# 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_all.csv
-outfile_name = datetime.now().strftime("%y%m%d") + "_all" + '.csv'
+# 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_상위폴더명_all.csv
+outfile_name = datetime.now().strftime("%y%m%d") + "_" + os.path.basename(dicom_root_path) + "_all" + '.csv'
 with open(outfile_name, 'w', newline='') as csvfile:
     # writer 생성
     writer = csv.writer(csvfile, delimiter=',')
