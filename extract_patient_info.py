@@ -20,7 +20,7 @@ def get_fieldnames():
     :return: tag array
     """
     dicom_tags = pd.read_csv('./dicom_tags.csv')
-    return ['directory_name'] + list(dicom_tags['Description'])
+    return ['directory_name'] + ['file_name'] + list(dicom_tags['Description'])
 
 
 def folder_to_csv(folder_name):
