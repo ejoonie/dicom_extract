@@ -10,7 +10,7 @@ import numpy as np
 
 # config
 dicom_root_path = "./dicom_sample"  # 경로형태로 넣어줘야 함
-output_jpeg_dir = 'output_jpeg'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
+output_jpeg_dir = 'output_jpeg/' + datetime.now().strftime("%y%m%d") + "_" + os.path.basename(dicom_root_path)  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 
 
 def get_fieldnames():
@@ -19,7 +19,7 @@ def get_fieldnames():
     뽑아야 할 다이콤 필드 리스트를 반환한다.
     :return: tag array
     """
-    dicom_tags = pd.read_csv('./dicom_tags.csv')
+    dicom_tags = pd.read_csv('./dicom_CT_tags.csv')
     return ['directory_name'] + ['file_name'] + list(dicom_tags['Description'])
 
 

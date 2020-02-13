@@ -2,7 +2,7 @@ import os
 import shutil
 
 # dicom_root_path = '../from_1691'
-dicom_root_path = '/Users/Yousun/Downloads/L3_Internal validation'
+dicom_root_path = '/Users/Yousun/Downloads/2012'
 
 # 실수할 수도 있으므로 dry_run 을 설정해서 로그만 찍을 것인지
 # 실제 작동도 진행할 것인지 결정한다.
