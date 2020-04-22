@@ -7,11 +7,12 @@ import matplotlib.pyplot as plt
 import cv2
 import PIL
 import numpy as np
+import shutil
 
 # config
 dicom_root_path = "./dicom_sample"  # 경로형태로 넣어줘야 함
 output_jpeg_dir = 'output_jpeg/' + datetime.now().strftime("%y%m%d") + "_" + os.path.basename(dicom_root_path)  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
-
+output_csv_dir = 'output_csv'
 
 def get_fieldnames():
     """
@@ -130,7 +131,6 @@ def folder_to_jpg(input_folder_name,
         print("이미지변환 에러발생: %s" % output_file_name)
 
 
-
 def file_to_jpeg(input_file_path, output_file_path):
     ds = dicom.dcmread(input_file_path, force=True)
     pixel_array = ds.pixel_array
@@ -142,13 +142,22 @@ def file_to_jpeg(input_file_path, output_file_path):
     cv2.imwrite(output_file_path, image_2d_scaled_uint8)
 
 
+def file_to_csv(output_csv_dir):
+    # 폴더 없으면 새로 생성
+    if not os.path.exists(output_csv_dir):
+        print("Directory does not exist. Creating %s" % output_csv_dir)
+        os.mkdir(output_csv_dir)
+
+    shutil.move(os.path.join('./', outfile_name), output_csv_dir)
+
+
 #
 # main
 #
 print("Root dir is %s" % dicom_root_path)
 all_rows = []
 # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
-for folder_name in os.listdir(dicom_root_path): # [0:x] 0 부터 .. x 까지
+for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
     if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_jpeg_dir:
         # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
         print("%s" % folder_name)
@@ -173,5 +182,8 @@ with open(outfile_name, 'w', newline='') as csvfile:
     for row in all_rows:
         writer.writerow(row)
 
-# 3. 하나만 출력할 경우 실행
-# folder_to_jpg("Thigh01-0867_DCM_POST", output_jpeg_dir)
+# 3. csv 파일 경로 이동
+file_to_csv(output_csv_dir)
+
+# 4. 하나만 출력할 경우 실행
+# folder_to_jpg("Thigh01-0867_DCM_POST", output_jpeg_dir)\
