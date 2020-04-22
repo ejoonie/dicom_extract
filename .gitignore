@@ -1,0 +1,12 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea/dicom_extract.iml
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+output_jpeg
+venv/bin/
+venv/include/
+venv/lib/
+venv/pyvenv.cfg
+/output_csv/

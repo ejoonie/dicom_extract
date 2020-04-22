@@ -2,7 +2,7 @@ import os
 import shutil
 
 # root_path = '../from_1691'
-root_path = '/Users/Yousun/Downloads/test'
+root_path = '/Users/Yousun/Downloads/Dynamic(익명화)'
 
 # 실수할 수도 있으므로 dry_run 을 설정해서 로그만 찍을 것인지
 # 실제 작동도 진행할 것인지 결정한다.

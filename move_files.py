@@ -2,7 +2,7 @@ import os
 import shutil
 
 # dicom_root_path = '../from_1691'
-dicom_root_path = '/Users/Yousun/Downloads/Dynamic(익명화)'
+dicom_root_path = '/Users/Yousun/Downloads/Pancreatic cancer_YMW_Sorting_Final'
 
 # 실수할 수도 있으므로 dry_run 을 설정해서 로그만 찍을 것인지
 # 실제 작동도 진행할 것인지 결정한다.
