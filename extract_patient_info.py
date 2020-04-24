@@ -26,6 +26,7 @@ dicom_root_path = root_path.dirName
 output_img_dir = 'output_img/' + nowdate + "_" + os.path.basename(dicom_root_path)  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 output_csv_dir = 'output_csv'   # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 
+
 # def get_fieldnames():
 #     """
 #     여러곳에서 재 사용하기 위해 만든 함수
