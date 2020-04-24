@@ -21,7 +21,7 @@ root_path.dirName = filedialog.askdirectory()
 dicom_root_path = root_path.dirName
 
 # root 경로 입력
-# dicom_root_path = '/Users/Yousun/Downloads/TEST'
+# dicom_root_path = '/DICOM_ROOT_PATH'
 
 output_img_dir = 'output_img/' + nowdate + "_" + os.path.basename(dicom_root_path)  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 output_csv_dir = 'output_csv'   # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
@@ -244,7 +244,7 @@ if all_or_one == 'y':
 
     # 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_상위폴더명_all.csv
     outfile_name = nowdate + "_" + os.path.basename(dicom_root_path) + "_all" + '.csv'
-    with open(outfile_name, 'w', newline='') as csvfile:
+    with open(outfile_name, 'w', newline='', encoding='utf-8-sig') as csvfile:
         # writer 생성
         writer = csv.writer(csvfile, delimiter=',')
 
@@ -269,7 +269,7 @@ else:
 
     # 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_상위폴더명_all.csv
     outfile_name = nowdate + "_" + os.path.basename(dicom_root_path) + "_one" + '.csv'
-    with open(outfile_name, 'w', newline='') as csvfile:
+    with open(outfile_name, 'w', newline='', encoding='utf-8-sig') as csvfile:
         # writer 생성
         writer = csv.writer(csvfile, delimiter=',')
 
