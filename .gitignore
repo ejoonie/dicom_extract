@@ -10,3 +10,6 @@ venv/include/
 venv/lib/
 venv/pyvenv.cfg
 /output_csv/
+!/dicom_CT_all.csv
+!/dicom_CT_one.csv
+/output_img/
