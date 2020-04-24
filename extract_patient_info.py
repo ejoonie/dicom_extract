@@ -9,23 +9,22 @@ import PIL
 import numpy as np
 import shutil
 
-
 # config
 nowdate = datetime.now().strftime('%y%m%d')
 
 # GUI로 dicom_root_path 선택
-from tkinter import filedialog
-from tkinter import *
-root_path = Tk()
-root_path.dirName = filedialog.askdirectory()
-dicom_root_path = root_path.dirName
+# from tkinter import filedialog
+# from tkinter import *
+#
+# root_path = Tk()
+# root_path.dirName = filedialog.askdirectory()
+# dicom_root_path = root_path.dirName
 
 # root 경로 입력
-# dicom_root_path = '/DICOM_ROOT_PATH'
+dicom_root_path = '/DICOM_ROOT_PATH'
 
 output_img_dir = 'output_img/' + nowdate + "_" + os.path.basename(dicom_root_path)  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
-output_csv_dir = 'output_csv'   # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
-
+output_csv_dir = 'output_csv'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 
 # def get_fieldnames():
 #     """
@@ -139,7 +138,6 @@ def file_to_array(folder_name):
     return row_one
 
 
-
 def folder_to_img(input_folder_name,
                   output_folder_name,
                   input_file_name=None,
@@ -224,9 +222,6 @@ if all_or_one == 'y':
             # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
             print("%s" % folder_name)
 
-            # 폴더별 jpeg 출력
-            folder_to_img(folder_name, output_img_dir)
-
             # 데이터 추출 및 합치기
             rows = folder_to_array(folder_name)
             total_rows += rows
@@ -244,13 +239,11 @@ if all_or_one == 'y':
         for row in total_rows:
             writer.writerow(row)
 else:
+    # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
     for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
         if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_img_dir:
             # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
             print("%s" % folder_name)
-
-            # 폴더별 jpeg 출력
-            folder_to_img(folder_name, output_img_dir)
 
             # 데이터 추출 및 합치기
             rows = file_to_array(folder_name)
@@ -269,8 +262,13 @@ else:
         for row in total_rows:
             writer.writerow(row)
 
-# 3. csv 파일 경로 이동
+# 3. 폴더별 image 출력
+for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
+    if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_img_dir:
+        folder_to_img(folder_name, output_img_dir)
+
+# 4. csv 파일 경로 이동
 move_csv(output_csv_dir)
 
-# 4. 하나만 출력할 경우 실행
-# folder_to_jpg("Thigh01-0867_DCM_POST", output_jpeg_dir)\
+# 5. 하나만 출력할 경우 실행
+# folder_to_img("Thigh01-0867_DCM_POST", output_img_dir)
