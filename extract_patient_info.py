@@ -39,25 +39,13 @@ output_csv_dir = 'output_csv'   # root 경로에 있는 디렉토리 이름으�
 #
 #     return ['directory_name'] + ['file_name'] + list(dicom_tags['Description'])
 
-
-def get_fieldnames_all():
-    """
-    여러곳에서 재 사용하기 위해 만든 함수
-    뽑아야 할 다이콤 필드 리스트를 반환한다.
-    :return: tag array
-    """
-    dicom_tags = pd.read_csv('./dicom_CT_all.csv')
+def get_fieldnames(all_or_one):
+    if all_or_one == 'y':
+        dicom_tags = pd.read_csv('./dicom_CT_all.csv')
+    else:
+        dicom_tags = pd.read_csv('./dicom_CT_one.csv')
     return ['directory_name'] + ['file_name'] + list(dicom_tags['Description'])
 
-
-def get_fieldnames_one():
-    """
-    여러곳에서 재 사용하기 위해 만든 함수
-    뽑아야 할 다이콤 필드 리스트를 반환한다.
-    :return: tag array
-    """
-    dicom_tags = pd.read_csv('./dicom_CT_one.csv')
-    return ['directory_name'] + ['file_name'] + list(dicom_tags['Description'])
 
 # def folder_to_csv(folder_name):
 #     """
@@ -98,7 +86,7 @@ def folder_to_array(folder_name):
     images_path = os.listdir(folder_path)
 
     rows_all = []
-    fieldnames = get_fieldnames_all()
+    fieldnames = get_fieldnames(all_or_one)
     for n, image in enumerate(images_path):
         ds = dicom.dcmread(os.path.join(folder_path, image), force=True)
         row = []
@@ -130,7 +118,7 @@ def file_to_array(folder_name):
     select_image = dicom_files[int(len(dicom_files) / 2)]
 
     row_one = []
-    fieldnames = get_fieldnames_one()
+    fieldnames = get_fieldnames(all_or_one)
     # for n, image in enumerate(images_path):
     ds = dicom.dcmread(os.path.join(folder_path, select_image), force=True)
 
@@ -249,7 +237,7 @@ if all_or_one == 'y':
         writer = csv.writer(csvfile, delimiter=',')
 
         # 헤더 출력
-        writer.writerow(get_fieldnames_all())
+        writer.writerow(get_fieldnames(all_or_one))
 
         # 데이터 출력
         for row in total_rows:
@@ -274,7 +262,7 @@ else:
         writer = csv.writer(csvfile, delimiter=',')
 
         # 헤더 출력
-        writer.writerow(get_fieldnames_one())
+        writer.writerow(get_fieldnames(all_or_one))
 
         # 데이터 출력
         for row in total_rows:
