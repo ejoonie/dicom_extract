@@ -1,6 +1,7 @@
 import os
 import shutil
 
+# PatientID/CTdate_DCM/*.dcm 폴더구조를 PatientID/*.dcm 으로 변경하는 코드
 # dicom_root_path = '../from_1691'
 dicom_root_path = '/Users/Yousun/Downloads/Pancreatic cancer_YMW_Sorting_Final'
 

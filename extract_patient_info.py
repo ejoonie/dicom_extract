@@ -13,15 +13,15 @@ import shutil
 nowdate = datetime.now().strftime('%y%m%d')
 
 # GUI로 dicom_root_path 선택
-# from tkinter import filedialog
-# from tkinter import *
-#
-# root_path = Tk()
-# root_path.dirName = filedialog.askdirectory()
-# dicom_root_path = root_path.dirName
+from tkinter import filedialog
+from tkinter import *
+
+root_path = Tk()
+root_path.dirName = filedialog.askdirectory()
+dicom_root_path = root_path.dirName
 
 # root 경로 입력
-dicom_root_path = '/DICOM_ROOT_PATH'
+# dicom_root_path = '/DICOM_ROOT_PATH'
 
 output_img_dir = 'output_img/' + nowdate + "_" + os.path.basename(dicom_root_path)  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 output_csv_dir = 'output_csv'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
@@ -168,7 +168,7 @@ def folder_to_img(input_folder_name,
 
     # input_file_name 을 정했으면 그대로사용, 아니면 중간파일
     # 파일의 시작은 0, 마지막 파일은 int(len(dicom_files) - 1
-    input_file_name = input_file_name or dicom_files[int(len(dicom_files) / 2)]
+    input_file_name = input_file_name or dicom_files[int(len(dicom_files) - 1)]
 
     # output_file_name 을 정했으면 그대로 사용, 아니면 디폴트
     output_file_name = output_file_name or default_img_file_name
@@ -272,3 +272,4 @@ move_csv(output_csv_dir)
 
 # 5. 하나만 출력할 경우 실행
 # folder_to_img("Thigh01-0867_DCM_POST", output_img_dir)
+
