@@ -13,15 +13,15 @@ import shutil
 nowdate = datetime.now().strftime('%y%m%d')
 
 # GUI로 dicom_root_path 선택
-from tkinter import filedialog
-from tkinter import *
-
-root_path = Tk()
-root_path.dirName = filedialog.askdirectory()
-dicom_root_path = root_path.dirName
+# from tkinter import filedialog
+# from tkinter import *
+#
+# root_path = Tk()
+# root_path.dirName = filedialog.askdirectory()
+# dicom_root_path = root_path.dirName
 
 # root 경로 입력
-dicom_root_path = '/DICOM_ROOT_PATH'  # change
+dicom_root_path = '/Users/Yousun/Desktop/test'  # change
 
 output_img_dir = 'output_img/' + nowdate + "_" + os.path.basename(dicom_root_path)  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 output_csv_dir = 'output_csv'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
@@ -115,12 +115,12 @@ def file_to_array(folder_name):
 
     dicom_files = os.listdir(folder_path)
     dicom_files.sort()  # 이름순 정렬
-    select_image = dicom_files[int(len(dicom_files) / 2)]
+    select_img = dicom_files[int(len(dicom_files) / 2)]
 
     row_one = []
     fieldnames = get_fieldnames(all_or_one)
     # for n, image in enumerate(images_path):
-    ds = dicom.dcmread(os.path.join(folder_path, select_image), force=True)
+    ds = dicom.dcmread(os.path.join(folder_path, select_img), force=True)
 
     row = []
     row.append(folder_name)
@@ -138,7 +138,7 @@ def file_to_array(folder_name):
     return row_one
 
 
-def folder_to_img(input_folder_name,
+def folder_to_img(select_img, input_folder_name,
                   output_folder_name,
                   input_file_name=None,
                   output_file_name=None):
@@ -168,7 +168,10 @@ def folder_to_img(input_folder_name,
 
     # input_file_name 을 정했으면 그대로사용, 아니면 중간파일
     # 파일의 시작은 0, 마지막 파일은 int(len(dicom_files) - 1
-    input_file_name = input_file_name or dicom_files[int(len(dicom_files) - 1)]  # change
+    tmp = {'0': 0,
+           '1': len(dicom_files) - 1,
+           '2': int(len(dicom_files)/2)}
+    input_file_name = input_file_name or dicom_files[tmp[select_img]]
 
     # output_file_name 을 정했으면 그대로 사용, 아니면 디폴트
     output_file_name = output_file_name or default_img_file_name
@@ -204,8 +207,12 @@ def move_csv(output_csv_dir):
         print("Directory does not exist. Creating %s" % output_csv_dir)
         os.mkdir(output_csv_dir)
 
-    shutil.move(os.path.join('./', outfile_name), output_csv_dir)
-
+    # 당일 여러번 분석 시, 기존 생성한 csv 파일 삭제하고 다시 생성
+    if os.path.isfile(os.path.join('./', output_csv_dir, outfile_name)):
+        os.remove(os.path.join('./', output_csv_dir, outfile_name))
+        shutil.move(os.path.join('./', outfile_name), output_csv_dir)
+    else:
+        shutil.move(os.path.join('./', outfile_name), output_csv_dir)
 
 #
 # main
@@ -215,57 +222,118 @@ print("Root dir is %s" % dicom_root_path)
 all_or_one = input('Extract information to all DCM files? (y or n): ')
 total_rows = []
 
+get_img = input('Extract PNG files from DCM files? (y or n): ')
+
+
 if all_or_one == 'y':
-    # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
-    for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
-        if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_img_dir:
-            # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
-            print("%s" % folder_name)
+    # image 출력 시 어떤 이미지 선택?
+    if get_img == 'y':
+        select_img = input('Enter one of the following numbers (First [0] or End [1] or Middle [2]): ')
 
-            # 데이터 추출 및 합치기
-            rows = folder_to_array(folder_name)
-            total_rows += rows
+        # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
+        for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
+            if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_img_dir:
+                # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
+                print("%s" % folder_name)
 
-    # 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_상위폴더명_all.csv
-    outfile_name = nowdate + "_" + os.path.basename(dicom_root_path) + "_all" + '.csv'
-    with open(outfile_name, 'w', newline='', encoding='utf-8-sig') as csvfile:
-        # writer 생성
-        writer = csv.writer(csvfile, delimiter=',')
+                # 폴더별 이미지 출력
+                folder_to_img(select_img, folder_name, output_img_dir)
 
-        # 헤더 출력
-        writer.writerow(get_fieldnames(all_or_one))
+                # 데이터 추출 및 합치기
+                rows = folder_to_array(folder_name)
+                total_rows += rows
 
-        # 데이터 출력
-        for row in total_rows:
-            writer.writerow(row)
+        # 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_상위폴더명_all.csv
+        outfile_name = nowdate + "_" + os.path.basename(dicom_root_path) + "_all" + '.csv'
+        with open(outfile_name, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            # writer 생성
+            writer = csv.writer(csvfile, delimiter=',')
+
+            # 헤더 출력
+            writer.writerow(get_fieldnames(all_or_one))
+
+            # 데이터 출력
+            for row in total_rows:
+                writer.writerow(row)
+    else:
+        # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
+        for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
+            if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_img_dir:
+                # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
+                print("%s" % folder_name)
+
+                # 데이터 추출 및 합치기
+                rows = folder_to_array(folder_name)
+                total_rows += rows
+
+        # 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_상위폴더명_all.csv
+        outfile_name = nowdate + "_" + os.path.basename(dicom_root_path) + "_all" + '.csv'
+        with open(outfile_name, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            # writer 생성
+            writer = csv.writer(csvfile, delimiter=',')
+
+            # 헤더 출력
+            writer.writerow(get_fieldnames(all_or_one))
+
+            # 데이터 출력
+            for row in total_rows:
+                writer.writerow(row)
+
 else:
-    # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
-    for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
-        if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_img_dir:
-            # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
-            print("%s" % folder_name)
+    # image 출력 시 어떤 이미지 선택?
+    if get_img == 'y':
+        select_img = input('Enter one of the following numbers (First [0] or End [1] or Middle [2]): ')
 
-            # 데이터 추출 및 합치기
-            rows = file_to_array(folder_name)
-            total_rows += rows
+        # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
+        for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
+            if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_img_dir:
+                # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
+                print("%s" % folder_name)
 
-    # 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_상위폴더명_all.csv
-    outfile_name = nowdate + "_" + os.path.basename(dicom_root_path) + "_one" + '.csv'
-    with open(outfile_name, 'w', newline='', encoding='utf-8-sig') as csvfile:
-        # writer 생성
-        writer = csv.writer(csvfile, delimiter=',')
+                # 폴더별 이미지 출력
+                folder_to_img(select_img, folder_name, output_img_dir)
 
-        # 헤더 출력
-        writer.writerow(get_fieldnames(all_or_one))
+                # 데이터 추출 및 합치기
+                rows = file_to_array(folder_name)
+                total_rows += rows
 
-        # 데이터 출력
-        for row in total_rows:
-            writer.writerow(row)
+        # 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_상위폴더명_all.csv
+        outfile_name = nowdate + "_" + os.path.basename(dicom_root_path) + "_one" + '.csv'
+        with open(outfile_name, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            # writer 생성
+            writer = csv.writer(csvfile, delimiter=',')
 
-# 3. 폴더별 image 출력
-for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
-    if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_img_dir:
-        folder_to_img(folder_name, output_img_dir)
+            # 헤더 출력
+            writer.writerow(get_fieldnames(all_or_one))
+
+            # 데이터 출력
+            for row in total_rows:
+                writer.writerow(row)
+
+    else:
+        # 1. 전체 다 까서 한 배열에 집어 넣은 다음에
+        for folder_name in os.listdir(dicom_root_path):  # [0:x] 0 부터 .. x 까지
+            if os.path.isdir(os.path.join(dicom_root_path, folder_name)) and folder_name != output_img_dir:
+                # 디렉토리 이름을 출력해줘야 진행상황 알 수 있음
+                print("%s" % folder_name)
+
+                # 데이터 추출 및 합치기
+                rows = file_to_array(folder_name)
+                total_rows += rows
+
+        # 2. 합친 데이터를 csv 로 한꺼번에 출력 - 파일이름은 날짜_상위폴더명_all.csv
+        outfile_name = nowdate + "_" + os.path.basename(dicom_root_path) + "_one" + '.csv'
+        with open(outfile_name, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            # writer 생성
+            writer = csv.writer(csvfile, delimiter=',')
+
+            # 헤더 출력
+            writer.writerow(get_fieldnames(all_or_one))
+
+            # 데이터 출력
+            for row in total_rows:
+                writer.writerow(row)
+
 
 # 4. csv 파일 경로 이동
 move_csv(output_csv_dir)
