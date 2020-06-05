@@ -21,7 +21,7 @@ root_path.dirName = filedialog.askdirectory()
 dicom_root_path = root_path.dirName
 
 # root 경로 입력
-# dicom_root_path = '/DICOM_ROOT_PATH'
+dicom_root_path = '/DICOM_ROOT_PATH'  # change
 
 output_img_dir = 'output_img/' + nowdate + "_" + os.path.basename(dicom_root_path)  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 output_csv_dir = 'output_csv'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
@@ -41,9 +41,9 @@ output_csv_dir = 'output_csv'  # root 경로에 있는 디렉토리 이름으로
 
 def get_fieldnames(all_or_one):
     if all_or_one == 'y':
-        dicom_tags = pd.read_csv('./dicom_CT_all.csv')
+        dicom_tags = pd.read_csv('./dicom_CT_all.csv')  # change
     else:
-        dicom_tags = pd.read_csv('./dicom_CT_one.csv')
+        dicom_tags = pd.read_csv('./dicom_CT_one.csv')  # change
     return ['directory_name'] + ['file_name'] + list(dicom_tags['Description'])
 
 
@@ -168,7 +168,7 @@ def folder_to_img(input_folder_name,
 
     # input_file_name 을 정했으면 그대로사용, 아니면 중간파일
     # 파일의 시작은 0, 마지막 파일은 int(len(dicom_files) - 1
-    input_file_name = input_file_name or dicom_files[int(len(dicom_files) - 1)]
+    input_file_name = input_file_name or dicom_files[int(len(dicom_files) - 1)]  # change
 
     # output_file_name 을 정했으면 그대로 사용, 아니면 디폴트
     output_file_name = output_file_name or default_img_file_name
