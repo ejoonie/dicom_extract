@@ -4,6 +4,7 @@ import pandas as pd
 import csv
 from datetime import datetime
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 import cv2
 import PIL
 import numpy as np
@@ -25,6 +26,7 @@ dicom_root_path = '/Users/Yousun/Desktop/test'  # change
 
 output_img_dir = 'output_img/' + nowdate + "_" + os.path.basename(dicom_root_path)  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
 output_csv_dir = 'output_csv'  # root 경로에 있는 디렉토리 이름으로 넣어줘야 함
+
 
 # def get_fieldnames():
 #     """
@@ -170,7 +172,7 @@ def folder_to_img(select_img, input_folder_name,
     # 파일의 시작은 0, 마지막 파일은 int(len(dicom_files) - 1
     tmp = {'0': 0,
            '1': len(dicom_files) - 1,
-           '2': int(len(dicom_files)/2)}
+           '2': int(len(dicom_files) / 2)}
     input_file_name = input_file_name or dicom_files[tmp[select_img]]
 
     # output_file_name 을 정했으면 그대로 사용, 아니면 디폴트
@@ -190,15 +192,40 @@ def folder_to_img(select_img, input_folder_name,
         print("이미지변환 에러발생: %s" % output_file_name)
 
 
+def transform_to_hu(ds, pixel_array):
+    intercept = ds.RescaleIntercept
+    slope = ds.RescaleSlope
+    hu_image = pixel_array * slope + intercept
+
+    return hu_image
+
+
+def window_image(pixel_array, window_center, window_width):
+    img_min = window_center - window_width // 2
+    img_max = window_center + window_width // 2
+    window_image = pixel_array.copy()
+    window_image[window_image < img_min] = img_min
+    window_image[window_image > img_max] = img_max
+
+    return window_image
+
+
 def dicom_to_img(input_file_path, output_file_path):
     ds = dicom.dcmread(input_file_path, force=True)
     pixel_array = ds.pixel_array
-    shape = pixel_array.shape
-    image_2d = pixel_array.astype(float)
-    image_2d_scaled = (np.maximum(image_2d, 0) / image_2d.max()) * 255.0
-    image_2d_scaled_uint8 = np.uint8(image_2d_scaled)
+    # shape = pixel_array.shape
+    # image_2d = pixel_array.astype(float)
+    # image_2d_scaled = (np.maximum(image_2d, 0) / image_2d.max()) * 255.0
+    # image_2d_scaled_uint8 = np.uint8(image_2d_scaled)
 
-    cv2.imwrite(output_file_path, image_2d_scaled_uint8)
+    hu_image = transform_to_hu(ds, pixel_array)
+    L3_image = window_image(hu_image, 0, 400)
+
+    plt.figure(figsize=(20, 10))
+    plt.style.use('grayscale')
+
+    # cv2.imwrite(output_file_path, image_2d_scaled_uint8)
+    mpimg.imsave(output_file_path, L3_image)
 
 
 def move_csv(output_csv_dir):
@@ -214,6 +241,7 @@ def move_csv(output_csv_dir):
     else:
         shutil.move(os.path.join('./', outfile_name), output_csv_dir)
 
+
 #
 # main
 #
@@ -223,7 +251,6 @@ all_or_one = input('Extract information to all DCM files? (y or n): ')
 total_rows = []
 
 get_img = input('Extract PNG files from DCM files? (y or n): ')
-
 
 if all_or_one == 'y':
     # image 출력 시 어떤 이미지 선택?
@@ -334,10 +361,8 @@ else:
             for row in total_rows:
                 writer.writerow(row)
 
-
 # 4. csv 파일 경로 이동
 move_csv(output_csv_dir)
 
 # 5. 하나만 출력할 경우 실행
 # folder_to_img("Thigh01-0867_DCM_POST", output_img_dir)
-
